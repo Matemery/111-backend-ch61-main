@@ -202,8 +202,57 @@ def create_expense():
     "message":"Expenses retrieved successfully"
   }),201
 
+@app.get("/api/expenses/<int:user_id>")
+def get_expenses_by_id(user_id):
+  conn = sqlite3.connect(DB_NAME)
+  conn.row_factory = sqlite3.Row
+  cursor = conn.cursor()
+
+  cursor.execute(SQL_SELECT_EXPENSES_BY_ID, (user_id,))
+  user = cursor.fetchone()
+  conn.close()
+
+  if user:
+   return success_response("expense RETRIEVED SUCCESSFULLY",dict(user))
+  
+  return not_found("expense")
+
+
+@app.put("/api/expenses/<int:user_id>")
+def update_expense(user_id):
+
+  data= request.get_json()
+  id = data.get("user_id")
+  title = data.get("title")
+  description = data.get("description")
+  amount = data.get("amount")
+  date = data.get("date"),
+  category = data.get("catergory")
+
+  conn = sqlite3.connect(DB_NAME)
+  cusor = conn.cursor()
+
+  cusor.execute(SQL_SELECT_EXPENSES_BY_ID, (user_id,))
+  if not cusor.fetchone():# fetchone, retrieves a single row from the result
+    conn.close()
+    return not_found("Expense")
+
+  cusor.execute(SQL_UPDATE_EXPENSES,( id, title, description, amount, date, category))
+  conn.close()
+
+  
+  return success_response( "expense updated successfully")
+
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
+
 
   init_db()
   app.run(debug=True)
